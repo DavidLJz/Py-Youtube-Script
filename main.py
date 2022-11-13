@@ -4,6 +4,14 @@ from datetime import datetime
 from os import path, makedirs
 import functions
 
+def get_default_output_path(ext:str) -> str:
+  makedirs(config("OUTPUT_PATH"), exist_ok=True)
+
+  now = datetime.now().strftime("%Y-%m-%d_%H%M")
+  path = config("OUTPUT_PATH") + f"\{now}"
+
+  return path + ext
+
 def run(command:str, args):
   acctoken_path = config("ACCESS_TOKEN_PATH")
   my_client_id = config("CLIENT_ID")
@@ -25,15 +33,10 @@ def run(command:str, args):
     else:
       result = functions.get_playlist_by_id(api, args.id)
 
-    makedirs(config("OUTPUT_PATH"), exist_ok=True)
-
-    now = datetime.now().strftime("%Y-%m-%d_%H%M")
-    args.output = config("OUTPUT_PATH") + f"\{now}"
-
     if args.format == "json":
-      args.output += ".json"
+      args.output = get_default_output_path(".json")
     elif args.format == "csv":
-      args.output += ".csv"
+      args.output = get_default_output_path(".csv")
 
   elif command == "videos":
     if args.playlist_id is None:
@@ -41,6 +44,18 @@ def run(command:str, args):
 
     else:
       result = functions.get_videos_by_playlist_id(api, args.playlist_id)
+
+  elif command == "vid_export":
+    if args.playlist_id is None:
+      result = {}
+
+    else:
+      result = functions.get_videos_by_playlist_id(api, args.playlist_id)
+
+    if args.format == "json":
+      args.output = get_default_output_path(".json")
+    elif args.format == "csv":
+      args.output = get_default_output_path(".csv")
 
   if args.output is None:
     print( json_dumps(result, indent=2, default=str) )

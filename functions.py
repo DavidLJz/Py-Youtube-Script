@@ -52,19 +52,24 @@ def format_playlists_data_items(items:list) -> list:
   return playlists
 
 def get_videos_by_playlist_id(api:Api, id:str):
-  data = api.get_playlist_items(playlist_id=id)
+  data = api.get_playlist_items(playlist_id=id, count=None)
   return format_video_data_items(data.items)
 
 def format_video_data_items(items:list) -> list:
   videos = []
 
   for item in items:
+    try:
+      thumbnail = item.snippet.thumbnails.high.default
+    except:
+      thumbnail = ""
+
     video_data = {
       "id": item.contentDetails.videoId,
       "publishedAt": item.snippet.publishedAt,
       "title": item.snippet.title,
       "description": item.snippet.description,
-      "thumbnails": item.snippet.thumbnails.high.url,
+      "thumbnails": thumbnail,
       "privacyStatus": item.status.privacyStatus
     }
 
