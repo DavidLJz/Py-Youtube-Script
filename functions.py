@@ -3,9 +3,7 @@ from json import dumps as json_dumps, load as json_load
 from datetime import datetime, timedelta
 from dateutil import parser as dt_parser
 import os
-import sys
-import psutil
-import traceback
+from csv import writer as csv_writer, QUOTE_MINIMAL
 
 def get_stored_access_token(acctoken_path:str):
   if os.path.isfile(acctoken_path) is False:
@@ -81,24 +79,63 @@ def store_access_token(token_model:AccessToken, acctoken_path:str):
     "time": datetime.now()
   }
 
-  with open(acctoken_path, "w") as f:
-    f.write(json_dumps(token_data, default=str))
+  save_json(acctoken_path, token_data)
+
+def save_json(path:str, data):
+  with open(path, "w") as f:
+    f.write( json_dumps(data, default=str) )
     f.close()
 
-def restart_program():
-  """Restarts the current program, with file objects and descriptors
-      cleanup
-  """
+def save_csv(path:str, data:list) -> bool:
+  if len(data) == 0:
+    return False
+    
+  with open(path, "r") as f:
+    csvw = csv_writer(f, delimiter=",", quotechar='"', quoting=QUOTE_MINIMAL)
+    
+    for i in range(len(data)):
+      item = data[i]
 
-  try:
-    p = psutil.Process(os.getpid())
+      if i == 0:
+        header = item.keys()
+        csvw.writerow(header)
+      
+      if item is dict:
+        item = item.values()
 
-    if hasattr(p, 'get_open_files'):
-      for handler in p.get_open_files() + p.connections():
-        os.close(handler.fd)
+      csvw.writerow(item)
 
-  except:
-    print(traceback.format_exc())
+    f.close()
 
-  python = sys.executable
-  os.execl(python, python, *sys.argv)
+  return True
+
+def get_api(acctoken_path:str, my_client_id:str, my_client_secret:str):
+  '''
+  Returns the Authenticated API object
+  '''
+
+  token_data = get_stored_access_token(acctoken_path)
+
+  if token_data is None:
+    api = Api(client_id=my_client_id, client_secret=my_client_secret)
+
+    auth_url = api.get_authorization_url()
+
+    print(
+      "Please kindly open the following URL for authorization :D\n", auth_url[0], "\n^^^ That one!\n"
+    )
+
+    print("Once thats done click on allow and you will be redirected to a URL on \"localhost\"")
+
+    print("Copy the whole url and paste it into this window")
+
+    url = input().strip()
+
+    token_model = api.generate_access_token(authorization_response=url)
+
+    store_access_token(token_model=token_model, acctoken_path=acctoken_path)
+    
+  else:
+    api = Api(access_token=token_data["access_token"])
+
+  return api
