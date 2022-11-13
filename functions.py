@@ -90,7 +90,7 @@ def save_csv(path:str, data:list) -> bool:
   if len(data) == 0:
     return False
     
-  with open(path, "r") as f:
+  with open(path, "w", newline="", encoding="utf-8") as f:
     csvw = csv_writer(f, delimiter=",", quotechar='"', quoting=QUOTE_MINIMAL)
     
     for i in range(len(data)):
@@ -99,9 +99,8 @@ def save_csv(path:str, data:list) -> bool:
       if i == 0:
         header = item.keys()
         csvw.writerow(header)
-      
-      if item is dict:
-        item = item.values()
+
+      item = item.values()
 
       csvw.writerow(item)
 
