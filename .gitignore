@@ -1,0 +1,6 @@
+.env
+*.json
+/venv
+/.vscode
+/__pycache__
+*workspace*
