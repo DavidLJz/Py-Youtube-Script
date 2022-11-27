@@ -11,7 +11,7 @@ First, customize the `.env.example` file with your own parameters, and then rena
 
 ```
 # Path to save the access token file
-ACCESS_TOKEN_PATH=C:\pyyt
+ACCESS_TOKEN_PATH=C:\pyyt\access_token.json
 
 # Path to download JSON and CSV data
 OUTPUT_PATH=C:\pyyt\output
