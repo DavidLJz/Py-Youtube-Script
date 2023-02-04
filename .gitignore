@@ -1,5 +1,6 @@
 .env
 *.json
+*.csv
 /venv
 /.vscode
 /__pycache__

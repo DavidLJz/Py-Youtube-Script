@@ -4,6 +4,12 @@ from datetime import datetime
 from os import path, makedirs
 import functions
 
+acctoken_path = config("ACCESS_TOKEN_PATH")
+my_client_id = config("CLIENT_ID")
+my_client_secret = config("CLIENT_SECRET")
+
+api = functions.get_api(acctoken_path, my_client_id, my_client_secret)
+
 def get_default_output_path(ext:str) -> str:
   makedirs(config("OUTPUT_PATH"), exist_ok=True)
 
@@ -12,13 +18,10 @@ def get_default_output_path(ext:str) -> str:
 
   return path + ext
 
-def run(command:str, args):
-  acctoken_path = config("ACCESS_TOKEN_PATH")
-  my_client_id = config("CLIENT_ID")
-  my_client_secret = config("CLIENT_SECRET")
+def get_videos_by_playlist_id(playlist_id:str):
+  return functions.get_videos_by_playlist_id(api, playlist_id)
 
-  api = functions.get_api(acctoken_path, my_client_id, my_client_secret)
-    
+def run(command:str, args):
   if command == "playlists":
     if args.id is None:
       result = functions.get_my_playlists(api)
